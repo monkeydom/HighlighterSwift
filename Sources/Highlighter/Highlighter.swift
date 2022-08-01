@@ -77,6 +77,7 @@ open class Highlighter {
         
         // Store the results for later
         self.hljs = hljs
+        self.hljs.invokeMethod("initLineNumbersOnLoad", withArguments: [])
         self.bundle = bundle
         
         // Check and set applying a theme or fail
