@@ -87,6 +87,11 @@ open class Highlighter {
     }
 
     
+    public struct Result {
+        public let attributedString: NSAttributedString
+        public let languageName: String
+    }
+    
     //MARK: - Primary Functions
     
     /**
@@ -97,9 +102,9 @@ open class Highlighter {
      - languageName: The language in which the code is written.
      - doFastRender: Should fast rendering be used? Default: `true`.
      
-     - Returns: The highlighted code as an NSAttributedString, or `nil`
+     - Returns: A `Highlighter.Result` struct holding both an Attributed String and the languageName of the chosen syntax, or `nil`
     */
-    open func highlight(_ code: String, as languageName: String? = nil, doFastRender: Bool = true) -> NSAttributedString? {
+    open func highlight(_ code: String, as languageName: String? = nil, doFastRender: Bool = true) -> Result? {
 
         let returnValue: JSValue
         
@@ -126,7 +131,11 @@ open class Highlighter {
         if renderedHTMLString == "undefined" {
             return nil
         }
-
+        
+        guard let usedLanguage = returnValue.objectForKeyedSubscript("language").toString() else {
+            return nil
+        }
+        
         // Convert the HTML received from Highlight.js to an NSAttributedString or nil
         var returnAttrString: NSAttributedString? = nil
         
@@ -151,7 +160,11 @@ open class Highlighter {
             }
         }
 
-        return returnAttrString
+        if let returnAttrString = returnAttrString {
+            return Result(attributedString: returnAttrString, languageName: usedLanguage)
+        } else {
+            return nil
+        }
     }
 
 
