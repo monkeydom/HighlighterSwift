@@ -20,7 +20,7 @@ import Foundation
     public typealias HRFont  = NSFont
 #endif
 
-private typealias HRThemeDict       = [String: [AnyHashable: AnyObject]]
+public typealias HRThemeDict       = [String: [AnyHashable: AnyObject]]
 private typealias HRThemeStringDict = [String: [String: String]]
 
 
@@ -30,6 +30,8 @@ private typealias HRThemeStringDict = [String: [String: String]]
 open class Theme {
 
     // MARK:- Public Properties
+    public static let hljsStyleClassesKey = AttributedStringKey("HLJSStyleClasses")
+    
     internal let theme: String
     internal var lightTheme: String!
 
@@ -40,7 +42,7 @@ open class Theme {
 
     
     // MARK:- Private Properties
-    private var themeDict : HRThemeDict!
+    public  var themeDict : HRThemeDict!
     private var strippedTheme : HRThemeStringDict!
 
 
@@ -53,9 +55,9 @@ open class Theme {
         - withTheme: The name of the Highlight.js theme to use. Default: `Default`.
         - usingFont: Optionally, a UIFont or NSFont to apply to the theme. Default: Courier @ 14pt.
     */
-    init(withTheme: String = "default", usingFont: HRFont? = nil) {
+    public init(withTheme: String, usingFont: HRFont? = nil) {
         
-        // Record the theme name
+        // Record the theme content
         self.theme = withTheme
         
         // Apply the font choice
@@ -88,6 +90,24 @@ open class Theme {
         }
     }
 
+    public convenience init(withThemeName themeName: String,usingFont font: HRFont? = nil) {
+
+        // Get the library's bundle based on how it's
+        // being included in the host app
+        #if SWIFT_PACKAGE
+        let bundle = Bundle.module
+        #else
+        let bundle = Bundle(for: Theme.self)
+        #endif
+
+        // Make sure we can load the theme's CSS file -- or fail
+        let themePath = bundle.path(forResource: themeName, ofType: "css")!
+        
+        // Get the theme CSS and instantiate a Theme object
+        let themeString = try! String.init(contentsOfFile: themePath)
+        self.init(withTheme:themeString, usingFont:font)
+    }
+    
     
     // MARK:- Getters and Setters
     
@@ -170,7 +190,7 @@ open class Theme {
                     }
                 }
             }
-
+            attrs.updateValue(styleList, forKey: Theme.hljsStyleClassesKey)
             returnString = NSAttributedString(string: string, attributes:attrs)
         } else {
             // No specified attributes? Just set the font
