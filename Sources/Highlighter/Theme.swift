@@ -24,13 +24,16 @@ public typealias HRThemeDict       = [String: [AnyHashable: AnyObject]]
 private typealias HRThemeStringDict = [String: [String: String]]
 
 
+public extension NSAttributedString.Key {
+    static let highlighterStyles = NSAttributedString.Key("HighlighterStyles")
+}
+
 /**
  Class representing HighlightSwift's interal storage of a processed Highlight.js theme.
  */
 open class Theme {
 
     // MARK:- Public Properties
-    public static let hljsStyleClassesKey = AttributedStringKey("HLJSStyleClasses")
     
     internal let theme: String
     internal var lightTheme: String!
@@ -190,7 +193,7 @@ open class Theme {
                     }
                 }
             }
-            attrs.updateValue(styleList, forKey: Theme.hljsStyleClassesKey)
+            attrs.updateValue(styleList, forKey: .highlighterStyles)
             returnString = NSAttributedString(string: string, attributes:attrs)
         } else {
             // No specified attributes? Just set the font
